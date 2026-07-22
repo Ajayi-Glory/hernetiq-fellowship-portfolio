@@ -1,0 +1,109 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowReadPatientDocuments",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::medvitals-patient-docs",
+        "arn:aws:s3:::medvitals-patient-docs/*"
+      ]
+    },
+    {
+      "Sid": "AllowDatabaseConnection",
+      "Effect": "Allow",
+      "Action": [
+        "rds-db:connect"
+      ],
+      "Resource": [
+        "arn:aws:rds-db:us-east-1:123456789012:dbuser:patient-db/medvitals-app"
+      ]
+    }
+  ]
+}
+
+This hardened IAM policy was created to ensure that the MedVitals AI application has only the permissions it needs to perform its tasks. The application’s role is to read patient documents stored in an Amazon S3 bucket and connect to a patient database. It does not require administrative privileges or access to other AWS resources.
+
+Version
+
+The Version field tells AWS which IAM policy language version to use when evaluating the policy. The value used is the current standard version for AWS IAM policies. It is not the date the policy was written; it simply specifies the policy syntax that AWS should follow.
+
+Statement
+
+The Statement section contains the actual permission rules. Each statement describes:
+
+* Whether access is allowed or denied.
+* Which actions are permitted.
+* Which AWS resources those actions apply to.
+
+This policy contains two statements because the application performs two separate functions: reading files from Amazon S3 and connecting to a database.
+
+Statement ID (Sid)
+
+Each statement has a Statement ID (Sid). This is simply a descriptive label that helps identify the purpose of the rule. It makes the policy easier to read and manage but does not affect how AWS enforces permissions.
+
+Effect
+
+The Effect determines whether the permissions in the statement are granted or blocked.
+
+In this policy, the effect is Allow, meaning the application is permitted to perform the specified actions. IAM policies can also use Deny, which explicitly blocks access. If there is ever a conflict between an Allow and a Deny, the Deny takes precedence.
+
+Actions
+
+The Action section specifies exactly what the application is allowed to do.
+
+For Amazon S3, the application is allowed to:
+
+* View the contents of the storage bucket.
+* Read and download patient documents.
+
+It is not allowed to upload, edit, or delete files because those permissions are unnecessary for its job.
+
+For the database, the application is only allowed to establish a connection. It cannot create, modify, or delete databases, nor can it change database settings. This ensures that the application has only the minimum permissions required.
+
+Resources
+
+The Resource section defines where the permissions apply.
+
+Instead of granting access to every storage bucket or every database in the AWS account, the policy restricts access to:
+
+* One specific S3 bucket that stores patient documents.
+* One specific patient database.
+
+By limiting access to only these resources, the policy reduces the risk of unauthorized access to other parts of the cloud environment.
+
+Why this policy is considered “hardened”
+
+A hardened policy is one that removes unnecessary permissions and follows security best practices.
+
+This policy is considered hardened because it:
+
+* Grants only the permissions the application requires.
+* Restricts access to specific AWS resources.
+* Avoids overly broad permissions.
+* Prevents the application from performing unnecessary or potentially dangerous actions, such as deleting files or modifying databases.
+
+Principle of Least Privilege
+
+The policy follows the Principle of Least Privilege, which is a fundamental cybersecurity concept.
+
+This principle means that users, applications, and services should receive only the permissions they need to perform their tasks—and nothing more.
+
+Applying least privilege helps reduce the impact of mistakes, insider threats, or compromised credentials because there are fewer permissions that an attacker could misuse.
+
+Why broad permissions are dangerous
+
+One of the most common cloud security mistakes is granting permissions that are too broad, such as allowing every action on every resource.
+
+If an application has unrestricted access and its credentials are compromised, an attacker could potentially:
+
+* Read sensitive information.
+* Delete important files.
+* Modify cloud resources.
+* Access services unrelated to the application’s purpose.
+
+By limiting permissions to only the required actions and resources, this hardened policy significantly reduces those risks.
