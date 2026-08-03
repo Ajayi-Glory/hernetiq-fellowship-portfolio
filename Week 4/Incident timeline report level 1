@@ -1,0 +1,128 @@
+Incident Report – MedVitals AI Security Incident
+Author:Ajayi GLory Nwakaego
+Role:AI Security Fellow(HerNetIQ Cohort 1)
+project:AI Defense Lab-Level 1
+
+Executive Summary
+
+On 30 June 2026, an attacker successfully compromised the MedVitals AI AWS environment by exploiting an overly permissive IAM role. The attacker assumed the AdminFullAccess role, enumerated Amazon S3 buckets, created a compressed archive containing sensitive patient records, and subsequently downloaded the archive. The investigation confirmed a successful data exfiltration event involving confidential patient information. Immediate remediation is required to prevent further compromise and strengthen cloud security controls.
+
+INCIDENT TIMELINE.
+Time (UTC)
+
+Event
+
+Description
+
+03:02:09
+
+AssumeRole
+
+The attacker assumed the AdminFullAccess IAM role using the compromised medvitals-deploy-bot credentials.
+
+03:02:31
+
+ListBuckets
+
+The attacker enumerated available S3 buckets to identify valuable storage locations.
+
+03:03:02
+
+PutObject
+
+The attacker created the archive exfil/bulk-export-20260630.tar.gz inside the medvitals-patient-records bucket, staging patient records for theft.
+
+03:04:18
+
+GetObject
+
+The attacker downloaded the staged archive, successfully exfiltrating sensitive patient data.
+
+
+Indicators of Compromise (IOCs)
+
+The following indicators were identified during the investigation:
+
+* Source IP Address: 198.51.100.45
+* Compromised IAM Identity: medvitals-deploy-bot
+* Assumed IAM Role: AdminFullAccess
+* Suspicious User Agent: python-requests/2.28.1
+* Affected S3 Bucket: medvitals-patient-records
+* Suspicious File: exfil/bulk-export-20260630.tar.gz
+* AWS API Calls Observed:
+    * AssumeRole
+    * ListBuckets
+    * PutObject
+    * GetObject
+
+Root Cause
+
+The investigation determined that the primary root cause was an overly permissive IAM wildcard policy, which allowed the deployment bot to assume the AdminFullAccess role.
+
+This excessive permission violated the Principle of Least Privilege and enabled the attacker to:
+
+* Escalate privileges
+* Access sensitive AWS resources
+* Enumerate S3 buckets
+* Stage sensitive data
+* Exfiltrate confidential patient records
+
+⸻
+
+Business Impact
+
+The incident had several significant impacts:
+
+* Unauthorized access to confidential patient medical records.
+* Potential violation of healthcare data privacy and compliance requirements.
+* Risk of legal penalties and regulatory investigations.
+* Loss of customer trust and organizational reputation.
+* Possible financial losses associated with incident response, remediation, and regulatory fines.
+* Increased cybersecurity risk due to exposed cloud resources.
+
+⸻
+
+Remediation Actions
+
+The following remediation actions were taken and are recommended:
+
+1. Removed the wildcard IAM policy that allowed unrestricted role assumption.
+2. Implemented the Principle of Least Privilege for all IAM roles.
+3. Rotated all compromised IAM credentials and access keys.
+4. Revoked unauthorized sessions and temporary credentials.
+5. Enabled continuous CloudTrail monitoring and alerting.
+6. Enabled Amazon GuardDuty and AWS Security Hub for threat detection.
+7. Restricted S3 bucket permissions using bucket policies.
+8. Enabled S3 server-side encryption and access logging.
+9. Reviewed all IAM roles and trust relationships.
+10. Implemented regular cloud security audits and permission reviews.
+
+⸻
+
+ Lessons Learned
+
+The investigation highlighted several important security lessons:
+
+* Never grant unnecessary administrative privileges to service accounts.
+* Avoid wildcard (*) permissions in IAM policies whenever possible.
+* Continuously monitor CloudTrail logs for suspicious activities.
+* Enforce the Principle of Least Privilege across all AWS resources.
+* Regularly review IAM roles, trust relationships, and access permissions.
+* Deploy automated threat detection tools to identify suspicious behavior early.
+* Conduct periodic security awareness and cloud security training.
+
+⸻
+
+Investigation Status
+
+Status: Closed – Root Cause Identified
+
+Summary
+
+* Attack vector successfully identified.
+* Root cause confirmed as an overly permissive IAM policy.
+* Complete attack timeline reconstructed.
+* Indicators of compromise documented.
+* Evidence confirms successful data exfiltration.
+* Immediate remediation recommendations have been provided.
+* No additional malicious activity was observed in the available CloudTrail logs after the data exfiltration event.
