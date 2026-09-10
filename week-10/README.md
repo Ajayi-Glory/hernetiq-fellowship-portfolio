@@ -4,6 +4,10 @@
 
 This diagram shows the end-to-end Retrieval-Augmented Generation (RAG) pipeline and highlights three important security attack surfaces.
 
+![RAG Pipeline Security Diagram](./week-10-rag-pipeline-diagram.png)
+
+
+
 ### RAG Pipeline
 
 The document processing flow is:
