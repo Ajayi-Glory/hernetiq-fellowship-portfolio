@@ -1,4 +1,4 @@
-# Week 10 – RAG Pipeline Security
+# Week 9 – RAG Pipeline Security
 
 ## Vector Data Pipeline Flow Diagram
 
