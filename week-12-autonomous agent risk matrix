@@ -1,0 +1,119 @@
+# Domain 5 — Session 24: Autonomous Agent Risk Matrix
+
+## 1. Scenario Description
+
+The AI application is an autonomous customer-support agent powered by a large language model (LLM). It can read customer messages, retrieve customer records, create support tickets, send emails, and issue refunds within a configured limit. It interacts with external APIs and uses stored conversation history to make decisions.
+
+Although these capabilities improve efficiency, they introduce security risks because the agent can access sensitive information and perform actions that affect customers and the organization. Security controls must ensure that the agent follows authorized instructions, accesses only permitted data, and performs actions within defined limits.
+
+## 2. Autonomous Agent Risk Matrix
+
+| Risk | Threat / Scenario | Potential Impact | Defensive Control | MAESTRO Layer | NIST AI RMF Function |
+|---|---|---|---|---|---|
+| **1. Agent Goal Hijacking** | A malicious customer includes prompt injection instructions in a support message, causing the agent to ignore its intended task and attempt an unauthorized refund. | Financial loss, policy violations, and manipulation of customer-support operations. | Treat customer messages and retrieved content as untrusted input. Separate data from system instructions, and validate refund requests against server-side authorization rules before execution. | Layer 1 — Foundation Models; Layer 3 — Agent Frameworks | **Manage** — implement and maintain controls that reduce prompt-injection risk. |
+| **2. Unauthorized Data Access** | The agent retrieves another customer's records because it relies on a customer ID supplied in a message without verifying ownership. | Exposure of personal information, privacy violations, regulatory consequences, and loss of customer trust. | Enforce server-side authorization on every record request. Derive the authenticated customer identity from a trusted session and verify ownership before returning data. | Layer 2 — Data Operations; Layer 6 — Security and Compliance | **Govern** — establish access-control responsibilities, policies, and accountability. |
+| **3. Tool Misuse** | The agent calls an email or ticketing tool with unintended parameters, sends a message to the wrong recipient, or includes confidential information in a support ticket. | Unauthorized disclosure, incorrect communications, and disruption of support operations. | Apply strict tool schemas, validate recipients and parameters, restrict available tools, and require human approval for sensitive or high-impact actions. | Layer 3 — Agent Frameworks | **Manage** — apply safeguards to reduce the likelihood and impact of unsafe tool use. |
+| **4. Excessive Privileges** | The agent uses an account with broad permissions that allow it to access records or perform administrative actions beyond its support responsibilities. | Large-scale data exposure, unauthorized changes, and increased damage if the agent or its credentials are compromised. | Apply least privilege, use dedicated service identities, restrict permissions by task, and rotate or use short-lived credentials where supported. | Layer 4 — Deployment and Infrastructure; Layer 6 — Security and Compliance | **Govern** — define and enforce access policies, ownership, and oversight. |
+| **5. Refund Abuse** | The agent processes repeated refunds for the same transaction or issues refunds to a user who does not meet the refund policy. | Financial losses, fraud, inaccurate accounting, and customer disputes. | Enforce refund limits and eligibility checks in the transaction service, use idempotency controls to prevent duplicate transactions, maintain audit logs, and require human approval above a defined threshold. | Layer 3 — Agent Frameworks; Layer 7 — Agent Ecosystem | **Manage** — implement transaction safeguards and response procedures for financial risk. |
+| **6. Memory or Context Poisoning** | A malicious user causes misleading information to be stored in conversation history, and the agent later treats it as trusted information when deciding how to handle a request. | Incorrect decisions, repeated security violations, and inappropriate disclosure or modification of customer information. | Validate stored information, distinguish trusted system data from user-provided content, restrict who can modify persistent memory, and log changes for review. | Layer 2 — Data Operations; Layer 5 — Evaluation and Observability | **Measure** — test and monitor whether memory handling creates security weaknesses or unreliable decisions. |
+| **7. Runaway or Repeated Actions** | A reasoning loop or API failure causes the agent to repeatedly create tickets, send emails, or retry refund requests without stopping. | Service disruption, unnecessary costs, duplicate transactions, and a poor customer experience. | Set action budgets, rate limits, timeouts, and retry limits. Monitor tool-call frequency and provide an emergency mechanism to stop the agent. | Layer 4 — Deployment and Infrastructure; Layer 5 — Evaluation and Observability | **Measure** — monitor behavior and detect abnormal action patterns so risks can be identified and addressed. |
+
+## 3. Technical and Governance Analysis
+
+The risk matrix uses two complementary frameworks.
+
+### MAESTRO: Technical Risk Mapping
+
+MAESTRO helps identify where a technical risk occurs within an agentic AI system.
+
+- **Layer 1 — Foundation Models:** Risks involving model behavior, instruction following, and prompt injection.
+- **Layer 2 — Data Operations:** Risks involving customer records, retrieved information, and persistent memory.
+- **Layer 3 — Agent Frameworks:** Risks involving planning, tool selection, tool execution, and action authorization.
+- **Layer 4 — Deployment and Infrastructure:** Risks involving runtime environments, credentials, resource limits, and service availability.
+- **Layer 5 — Evaluation and Observability:** Risks involving testing, monitoring, anomaly detection, and audit evidence.
+- **Layer 6 — Security and Compliance:** Risks involving access controls, privacy, policy enforcement, and regulatory obligations.
+- **Layer 7 — Agent Ecosystem:** Risks arising from interactions with external APIs, services, and other connected systems.
+
+### NIST AI Risk Management Framework: Governance Mapping
+
+The NIST AI RMF organizes how an organization manages AI-related risks.
+
+- **Govern:** Establish policies, responsibilities, accountability, and oversight for the agent.
+- **Map:** Identify the system's context, affected stakeholders, capabilities, and potential harms.
+- **Measure:** Analyze, test, monitor, and evaluate risks using appropriate evidence and metrics.
+- **Manage:** Prioritize risks and implement safeguards, response procedures, and ongoing risk treatment.
+
+The mappings in this table identify the most relevant primary NIST function for each risk. In practice, one risk may involve more than one function. For example, an organization may **Map** refund-abuse scenarios, **Measure** the frequency of attempted abuse, and **Manage** the risk through transaction controls.
+
+## 4. Quick Assessment Questions
+
+### 1. What is ASI01?
+
+ASI01 is **Agent Goal Hijack**. It occurs when an attacker manipulates an agent's instructions, objectives, or context so that it acts contrary to its intended purpose.
+
+### 2. What is the difference between ASI02 and ASI03?
+
+- **ASI02 — Tool Misuse and Exploitation:** The agent's tools or capabilities are misused, or tool interactions are manipulated to produce unintended actions.
+- **ASI03 — Identity and Privilege Abuse:** The agent's identity, credentials, permissions, or trust relationships are exploited to gain unauthorized access or perform actions beyond its authority.
+
+The main distinction is that ASI02 focuses on tool use, while ASI03 focuses on identity and authorization.
+
+### 3. Why does an autonomous agent create an action surface?
+
+An autonomous agent creates an action surface because it can do more than generate text. It can access databases, call external APIs, send emails, create tickets, and initiate transactions. Every connected tool and permitted action creates another opportunity for misuse, manipulation, or unintended consequences.
+
+### 4. What does schema enforcement provide?
+
+Schema enforcement checks that tool inputs and outputs follow an expected structure and use valid data types and fields. It can reject malformed or unexpected requests. However, a valid schema does not prove that an action is authorized; access control and business-rule validation are still required.
+
+### 5. What is the role of Llama Guard?
+
+Llama Guard is a safety-classification model that can classify prompts and responses against defined safety categories. It can help identify unsafe content, but it should not be treated as a complete security boundary or a replacement for authorization, input validation, and tool-level controls.
+
+### 6. How does NeMo Guardrails differ from a safety classifier?
+
+A safety classifier primarily evaluates content and assigns safety classifications. NeMo Guardrails is a broader framework for defining and enforcing conversational and workflow rules, including constraints on how an AI application responds or interacts. The two approaches can complement each other, but neither removes the need for application-level security controls.
+
+### 7. Name the seven MAESTRO layers.
+
+1. Foundation Models
+2. Data Operations
+3. Agent Frameworks
+4. Deployment and Infrastructure
+5. Evaluation and Observability
+6. Security and Compliance
+7. Agent Ecosystem
+
+### 8. Name the four NIST AI RMF functions.
+
+1. Govern
+2. Map
+3. Measure
+4. Manage
+
+### 9. Why should a risk matrix contain both technical and governance mappings?
+
+Technical mapping identifies where a risk occurs and which components need protection. Governance mapping identifies how the organization should establish accountability, assess the risk, implement controls, and monitor the outcome. Using both makes the matrix more useful for engineering teams and organizational decision-makers.
+
+## 5. Key Lessons Learned
+
+This exercise demonstrates that autonomous AI agents require stronger safeguards than systems that only generate text. An agent with access to customer data and external tools can turn a manipulated instruction or a software weakness into a real-world action.
+
+The most important lessons are:
+
+- Treat customer messages, retrieved documents, and stored conversation content as potentially untrusted.
+- Enforce authorization and business rules outside the LLM, especially for sensitive actions such as refunds.
+- Give the agent only the permissions required for its assigned tasks.
+- Validate tool inputs and outputs, and monitor actions for unusual patterns.
+- Use human approval for high-impact or exceptional transactions.
+- Combine technical controls with governance, testing, monitoring, and incident-response procedures.
+
+**Conclusion:** A secure autonomous agent must be constrained by enforceable permissions, validated actions, observable behavior, and clear organizational accountability. The LLM should not be the final authority for deciding whether a sensitive action is permitted.
+
+## 6. Evidence of Mastery
+
+The security analysis follows this sequence:
+
+**AI application → Agent capabilities → Threat scenarios → Potential impacts → Technical risk mapping with MAESTRO → Governance mapping with NIST AI RMF → Defensive controls**
+
+This process connects an agent's real capabilities to plausible threats, explains the consequences, and identifies both technical safeguards and organizational responsibilities.
