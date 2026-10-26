@@ -1,0 +1,137 @@
+
+## Introduction
+
+Autonomous AI agents can do more than answer questions. They can use tools, access databases, call APIs, execute commands, and perform actions to complete tasks. These capabilities make AI systems more useful, but they also introduce security risks.
+
+If an agent receives too many permissions or follows malicious instructions, it could access sensitive information, change records, or execute unauthorised actions. Therefore, agent security must include strict access controls, input validation, execution limits, and monitoring.
+
+## Scenario Analysis: AI Customer-Support Agent
+
+Imagine a company uses an AI agent to respond to customer enquiries. The agent can retrieve customer records, create support tickets, send emails, and process refunds.
+
+An attacker sends a message containing instructions telling the agent to ignore its normal rules and disclose another customer's information.
+
+If the agent trusts the malicious instructions and has unrestricted access to the customer database, it could expose private information.
+
+### Identified Risks
+
+- **Prompt injection:** Malicious instructions may attempt to manipulate the agent's behaviour.
+- **Excessive agency:** The agent may have more permissions than it needs.
+- **Unauthorised data access:** The agent may retrieve records belonging to other customers.
+- **Tool misuse:** The agent may use its tools for unintended actions.
+- **Unauthorised transactions:** An agent with excessive refund permissions could issue improper refunds.
+- **Insufficient monitoring:** Without audit logs, suspicious actions may be difficult to investigate.
+
+### Recommended Controls
+
+- Apply the principle of least privilege.
+- Verify customer identity and record ownership on the server side.
+- Validate every tool call and its arguments.
+- Require human approval for high-value refunds and other sensitive actions.
+- Keep audit logs of tool calls and authorisation decisions.
+- Treat customer messages and retrieved documents as untrusted input.
+- Apply rate limits and transaction limits.
+
+## Scenario Analysis: AI Code-Execution Agent
+
+An AI coding agent can generate and execute code to complete development tasks. If it can run unrestricted commands, access sensitive files, or use production credentials, malicious input or a coding mistake could compromise the environment.
+
+### Identified Risks
+
+- Arbitrary command execution.
+- Exposure of credentials and environment variables.
+- Unrestricted file access.
+- Unauthorised network connections.
+- Destructive operations performed without approval.
+- Excessive resource consumption.
+
+### Recommended Controls
+
+- Run generated code in an isolated environment.
+- Restrict commands using an allowlist and safe execution interfaces.
+- Limit filesystem and network access.
+- Keep secrets outside the agent's accessible workspace.
+- Apply execution timeouts and resource limits.
+- Require approval for destructive or production-level operations.
+- Log execution requests and outcomes.
+
+## Principle of Least Privilege
+
+The principle of least privilege means giving an agent only the permissions it needs to complete its assigned task.
+
+For example, a support agent that creates tickets should not automatically have permission to delete customer accounts or modify system-wide settings.
+
+I would apply this principle by identifying the agent's required actions, restricting its access to specific resources, separating read and write permissions, and requiring additional approval for sensitive operations.
+
+Permissions should be enforced by the backend rather than relying only on the AI model to follow instructions.
+
+## Input Validation and Output Validation
+
+Input validation ensures that requests and tool arguments meet defined requirements before an operation is performed.
+
+Examples include checking customer IDs, validating refund amounts, rejecting unexpected parameters, and confirming that a requested action is authorised.
+
+Output validation checks whether the agent's generated content or tool results are acceptable before they are used in another operation.
+
+For example, a proposed refund should be checked against business rules before the payment system processes it.
+
+Both controls should be enforced by application logic. The AI model should not be the only security checkpoint.
+
+## Execution Limits and Forbidden Commands
+
+An autonomous agent should not be allowed to continue executing actions without limits.
+
+Useful controls include:
+
+- Maximum tool calls per task.
+- Execution timeouts.
+- Rate limits.
+- Restrictions on financial transactions.
+- Limits on the number of records that can be changed.
+- Restrictions on network and filesystem access.
+
+Forbidden-string checks can identify some dangerous command patterns, but they are not sufficient on their own because commands can be expressed in different ways. Safer execution interfaces, strict allowlists, and isolation provide stronger protection.
+
+## Blast-Radius Reduction
+
+Blast radius describes the potential scope of damage caused by an incident.
+
+If an agent can access only one authorised customer's records, the potential impact of misuse is limited. If it can access every customer's records and modify the entire database, the impact could be much greater.
+
+I would reduce the blast radius by restricting permissions, isolating execution environments, limiting the scope of tool calls, separating sensitive systems, and requiring approval for high-impact actions.
+
+## Security Verification Plan
+
+The following tests could be performed in a controlled environment to evaluate the proposed controls.
+
+| Test | Procedure | Expected Result |
+|---|---|---|
+| Access-control test | Attempt to retrieve a record outside the authorised scope. | Access is denied. |
+| Tool-permission test | Request an operation that the agent is not permitted to perform. | The backend rejects the operation. |
+| Input-validation test | Submit malformed or unexpected tool arguments. | Invalid arguments are rejected. |
+| Prompt-injection test | Provide a controlled malicious instruction in a test message. | The instruction cannot override backend permissions. |
+| Command-execution test | Attempt a prohibited command in an isolated test environment. | The command is blocked or safely contained. |
+| Execution-limit test | Exceed the permitted tool-call or execution limit. | The agent stops according to the configured limits. |
+| Logging test | Review logs after authorised and rejected test actions. | Relevant actions and decisions are recorded. |
+
+These are proposed tests. Their results must be recorded after they have actually been performed.
+
+## Key Findings
+
+The analysis highlights three important findings.
+
+First, prompt injection can influence an agent's behaviour, but it should not grant the agent additional permissions. Backend authorisation must remain independent of the model's instructions.
+
+Second, excessive permissions increase the possible impact of a mistake or successful attack. Least privilege and restricted tool access reduce this risk.
+
+Third, unrestricted execution and weak validation can allow unsafe inputs to cause real system changes. Execution isolation, validation, limits, and monitoring are essential defensive controls.
+
+## Conclusion
+
+Autonomous AI agents introduce security risks because they can perform actions through tools and external systems. Securing these agents requires more than instructing the model to behave safely.
+
+The main controls I would prioritise are least privilege, independent backend authorisation, strict input validation, controlled tool execution, execution limits, isolation, audit logging, and human approval for sensitive actions.
+
+These controls help ensure that an agent can complete its intended task without receiving unnecessary authority or causing avoidable harm.
+
+**Practical status:** This assignment presents a scenario-based security analysis and proposed verification plan. The listed tests have not been claimed as completed.
