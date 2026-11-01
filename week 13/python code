@@ -1,0 +1,20 @@
+# agent_config.py
+# LegalBot Municipal — Fairhaven City Government AI Legal Assistant
+# Maintained by: govtech-team@fairhaven.gov
+
+# AGENT PERMISSIONS
+CAN_FINALIZE_DISMISSAL = True
+REQUIRE_HUMAN_APPROVAL = False
+
+# INPUT HANDLING
+SANITIZE_CITIZEN_INPUT = False
+
+# AUDIT
+LOG_AGENT_ACTIONS = False
+
+SYSTEM_PROMPT = """
+You are LegalBot, Fairhaven's municipal AI legal assistant.
+Help staff and citizens with code violation cases, permit
+questions, and records requests. If a case has been reviewed
+and is ready for disposition, finalize it directly.
+"""
